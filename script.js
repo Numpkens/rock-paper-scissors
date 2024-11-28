@@ -1,93 +1,109 @@
-// Get computer choice of 1-3
+let playerScore = 0;
+let computerScore = 0;
+
+// Get computer choice
 function getComputerChoice() {
-  return Math.floor(Math.random() * 3) + 1;
-}
-
-// Get human choice of 1-3
-function getHumanChoice() {
   const choices = ["Rock", "Paper", "Scissors"];
-  let choiceIndex;
-
-  console.log("Please select one of the following options:");
-  for (let i = 0; i < choices.length; i++) {
-    console.log(`${i + 1}. ${choices[i]}`);
-  }
-
-  const userInput = prompt("Enter the number of your chosen option (1-3):");
-
-  if (
-    isNaN(parseInt(userInput)) ||
-    parseInt(userInput) < 1 ||
-    parseInt(userInput) > 3
-  ) {
-    console.log("Invalid input. Please try again.");
-    return getHumanChoice();
-  }
-
-  choiceIndex = parseInt(userInput) - 1;
-  return choices[choiceIndex];
+  return choices[Math.floor(Math.random() * 3)];
 }
 
-function playRound() {
-  const playerChoice = getHumanChoice();
+// Update the score display
+function updateScore() {
+  document.getElementById("player-score").textContent = playerScore;
+  document.getElementById("computer-score").textContent = computerScore;
+}
+
+// Display result
+function displayResult(message) {
+  document.getElementById("result").textContent = message;
+}
+
+// Display winner announcement
+function displayAnnouncement(message) {
+  document.getElementById("announcement").textContent = message;
+}
+
+// Play a single round
+function playRound(playerChoice) {
   const computerChoice = getComputerChoice();
 
-  let computerChoiceText;
-  switch (computerChoice) {
-    case 1:
-      computerChoiceText = "Rock";
-      break;
-    case 2:
-      computerChoiceText = "Paper";
-      break;
-    case 3:
-      computerChoiceText = "Scissors";
-      break;
-  }
+  displayResult(`You chose ${playerChoice} - Computer chose ${computerChoice}`);
 
-  console.log(`Computer chose: ${computerChoiceText}`);
-  console.log(`You chose: ${playerChoice}`);
-
-  if (playerChoice === computerChoiceText) {
-    return "It's a Draw!";
-  }
-
-  if (
-    (playerChoice === "Rock" && computerChoiceText === "Scissors") ||
-    (playerChoice === "Paper" && computerChoiceText === "Rock") ||
-    (playerChoice === "Scissors" && computerChoiceText === "Paper")
+  if (playerChoice === computerChoice) {
+    displayAnnouncement("It's a Draw!");
+  } else if (
+    (playerChoice === "Rock" && computerChoice === "Scissors") ||
+    (playerChoice === "Paper" && computerChoice === "Rock") ||
+    (playerChoice === "Scissors" && computerChoice === "Paper")
   ) {
-    return "You Win!";
-  }
-
-  return "Computer Wins!";
-}
-
-function game() {
-  let playerScore = 0;
-  let computerScore = 0;
-
-  for (let round = 1; round <= 5; round++) {
-    console.log(`\nRound ${round}:`);
-    const result = playRound();
-    console.log(result);
-
-    if (result === "You Win!") {
-      playerScore++;
-    } else if (result === "Computer Wins!") {
-      computerScore++;
-    }
-
-    console.log(`Score - You: ${playerScore}, Computer: ${computerScore}`);
-  }
-
-  console.log("\nGame Over!");
-  if (playerScore > computerScore) {
-    console.log("You won the game!");
-  } else if (computerScore > playerScore) {
-    console.log("Computer won the game!");
+    playerScore++;
+    displayAnnouncement("You Win!");
   } else {
-    console.log("The game is a tie!");
+    computerScore++;
+    displayAnnouncement("Computer Wins!");
+  }
+
+  updateScore();
+
+  // Check for game winner
+  if (playerScore === 5) {
+    endGame("Congratulations! You won the game!");
+  } else if (computerScore === 5) {
+    endGame("Game Over! Computer won the game!");
   }
 }
-game();
+
+// End the game
+function endGame(message) {
+  displayAnnouncement(message);
+  disableButtons();
+  showPlayAgainButton();
+}
+
+// Disable buttons after game end
+function disableButtons() {
+  const buttons = document.querySelectorAll(".choice");
+  buttons.forEach((button) => (button.disabled = true));
+}
+
+// Enable buttons
+function enableButtons() {
+  const buttons = document.querySelectorAll(".choice");
+  buttons.forEach((button) => (button.disabled = false));
+}
+
+// Show Play Again button
+function showPlayAgainButton() {
+  const playAgainButton = document.getElementById("play-again");
+  playAgainButton.classList.add("visible");
+}
+
+// Hide Play Again button
+function hidePlayAgainButton() {
+  const playAgainButton = document.getElementById("play-again");
+  playAgainButton.classList.remove("visible");
+}
+
+// Reset game
+function resetGame() {
+  playerScore = 0;
+  computerScore = 0;
+  updateScore();
+  displayResult("");
+  displayAnnouncement("Choose your weapon!");
+  enableButtons();
+  hidePlayAgainButton();
+}
+
+// Add event listeners to buttons
+document.querySelectorAll(".choice").forEach((button) => {
+  button.addEventListener("click", () => {
+    playRound(button.getAttribute("data-choice"));
+  });
+});
+
+// Add event listener to Play Again button
+document.getElementById("play-again").addEventListener("click", resetGame);
+
+// Initial game setup
+displayAnnouncement("Choose your weapon!");
